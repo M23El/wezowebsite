@@ -17,6 +17,7 @@ interface ProductCardProps {
   isRTL?: boolean;
   onAddToCart?: (id: string) => void;
   onAddToWishlist?: (id: string) => void;
+  onClick?: () => void;
 }
 
 const ProductCard = ({
@@ -29,6 +30,7 @@ const ProductCard = ({
   isRTL = true,
   onAddToCart = () => {},
   onAddToWishlist = () => {},
+  onClick = () => {},
 }: ProductCardProps) => {
   const formattedPrice = isRTL
     ? new Intl.NumberFormat("ar-SD", {
@@ -41,7 +43,10 @@ const ProductCard = ({
   const textAlign = isRTL ? "text-right" : "text-left";
 
   return (
-    <Card className="w-full max-w-[280px] overflow-hidden bg-white hover:shadow-lg transition-shadow duration-300">
+    <Card
+      className="w-full max-w-[280px] overflow-hidden bg-white hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+      onClick={onClick}
+    >
       <div className="relative">
         <AspectRatio ratio={4 / 3}>
           <img src={image} alt={title} className="w-full h-full object-cover" />
@@ -50,7 +55,10 @@ const ProductCard = ({
           variant="ghost"
           size="icon"
           className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full"
-          onClick={() => onAddToWishlist(id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddToWishlist(id);
+          }}
         >
           <Heart className="h-5 w-5 text-gray-600 hover:text-red-500 transition-colors" />
         </Button>
@@ -84,7 +92,13 @@ const ProductCard = ({
       </CardContent>
 
       <CardFooter className="p-4 pt-0">
-        <Button className="w-full" onClick={() => onAddToCart(id)}>
+        <Button
+          className="w-full"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddToCart(id);
+          }}
+        >
           <ShoppingCart className="mr-2 h-4 w-4" />
           {isRTL ? "أضف إلى السلة" : "Add to Cart"}
         </Button>

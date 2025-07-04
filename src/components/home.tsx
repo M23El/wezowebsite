@@ -48,13 +48,26 @@ const HomePage = () => {
     }
   }, [language]);
 
-  const categories = [
-    { id: 1, name: { en: "Electronics", ar: "إلكترونيات" }, icon: "📱" },
-    { id: 2, name: { en: "Fashion", ar: "أزياء" }, icon: "👗" },
-    { id: 3, name: { en: "Home & Kitchen", ar: "المنزل والمطبخ" }, icon: "🏠" },
-    { id: 4, name: { en: "Beauty", ar: "الجمال" }, icon: "💄" },
-    { id: 5, name: { en: "Toys & Games", ar: "ألعاب" }, icon: "🎮" },
-    { id: 6, name: { en: "Books", ar: "كتب" }, icon: "📚" },
+  const homeCategories = [
+    {
+      id: "electronics",
+      name: { en: "Electronics", ar: "إلكترونيات" },
+      icon: "📱",
+    },
+    { id: "fashion", name: { en: "Fashion", ar: "أزياء" }, icon: "👗" },
+    {
+      id: "home",
+      name: { en: "Home & Kitchen", ar: "المنزل والمطبخ" },
+      icon: "🏠",
+    },
+    { id: "beauty", name: { en: "Beauty", ar: "الجمال" }, icon: "💄" },
+    {
+      id: "personal-care",
+      name: { en: "Personal Care", ar: "العناية الشخصية" },
+      icon: "🧴",
+    },
+    { id: "sports", name: { en: "Sports", ar: "رياضة" }, icon: "⚽" },
+    { id: "games", name: { en: "Games", ar: "ألعاب" }, icon: "🎮" },
   ];
 
   const featuredProducts = [
@@ -153,6 +166,7 @@ const HomePage = () => {
               </button>
 
               <button
+                onClick={() => (window.location.href = "/cart")}
                 className={`hidden md:flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 ${language === "ar" ? "flex-row-reverse" : ""}`}
               >
                 <ShoppingCart
@@ -162,6 +176,7 @@ const HomePage = () => {
               </button>
 
               <button
+                onClick={() => (window.location.href = "/wishlist")}
                 className={`hidden md:flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 ${language === "ar" ? "flex-row-reverse" : ""}`}
               >
                 <Heart
@@ -171,7 +186,7 @@ const HomePage = () => {
               </button>
 
               <button
-                onClick={() => setIsAuthModalOpen(true)}
+                onClick={() => (window.location.href = "/auth/login")}
                 className={`flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 ${language === "ar" ? "flex-row-reverse" : ""}`}
               >
                 <User
@@ -209,35 +224,45 @@ const HomePage = () => {
           <nav
             className={`hidden md:flex mt-4 ${language === "ar" ? "space-x-reverse space-x-6" : "space-x-6"}`}
           >
-            {categories.map((category) => (
+            {homeCategories.slice(0, 4).map((category) => (
               <a
                 key={category.id}
-                href="#"
+                href={`/products/${category.id}`}
                 className="text-gray-600 hover:text-blue-600 font-medium flex items-center gap-2"
               >
                 <span className="text-lg">{category.icon}</span>
                 {language === "en" ? category.name.en : category.name.ar}
               </a>
             ))}
-            <a
-              href="#"
-              className="text-gray-600 hover:text-blue-600 font-medium flex items-center"
-            >
-              {language === "en" ? "More" : "المزيد"}
-              <ChevronDown
-                className={`h-4 w-4 ${language === "ar" ? "mr-1" : "ml-1"}`}
-              />
-            </a>
+            <div className="relative group">
+              <button className="text-gray-600 hover:text-blue-600 font-medium flex items-center">
+                {language === "en" ? "More" : "المزيد"}
+                <ChevronDown
+                  className={`h-4 w-4 ${language === "ar" ? "mr-1" : "ml-1"}`}
+                />
+              </button>
+              <div className="absolute top-full left-0 mt-2 w-48 bg-white border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                {homeCategories.slice(4).map((category) => (
+                  <a
+                    key={category.id}
+                    href={`/products/${category.id}`}
+                    className="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                  >
+                    {language === "en" ? category.name.en : category.name.ar}
+                  </a>
+                ))}
+              </div>
+            </div>
           </nav>
 
           {/* Mobile Menu */}
           {showMobileMenu && (
             <div className="md:hidden mt-4 bg-white border rounded-md p-4 shadow-md">
               <div className="grid grid-cols-2 gap-4">
-                {categories.map((category) => (
+                {homeCategories.map((category) => (
                   <a
                     key={category.id}
-                    href="#"
+                    href={`/products/${category.id}`}
                     className="text-gray-600 hover:text-blue-600 font-medium py-2"
                   >
                     {language === "en" ? category.name.en : category.name.ar}
@@ -277,6 +302,7 @@ const HomePage = () => {
             <Button
               size="lg"
               className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 text-lg font-semibold"
+              onClick={() => (window.location.href = "/products")}
             >
               {language === "en" ? "Start Shopping" : "ابدأ التسوق"}
             </Button>
@@ -292,20 +318,19 @@ const HomePage = () => {
             {language === "en" ? "Shop by Category" : "تسوق حسب الفئة"}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {categories.map((category) => (
-              <Card
-                key={category.id}
-                className="hover:shadow-md transition-shadow"
-              >
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
-                    <span className="text-2xl">{category.icon}</span>
-                  </div>
-                  <h3 className="font-medium text-gray-700">
-                    {language === "en" ? category.name.en : category.name.ar}
-                  </h3>
-                </CardContent>
-              </Card>
+            {homeCategories.map((category) => (
+              <a key={category.id} href={`/products/${category.id}`}>
+                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+                      <span className="text-2xl">{category.icon}</span>
+                    </div>
+                    <h3 className="font-medium text-gray-700">
+                      {language === "en" ? category.name.en : category.name.ar}
+                    </h3>
+                  </CardContent>
+                </Card>
+              </a>
             ))}
           </div>
         </section>
@@ -316,7 +341,11 @@ const HomePage = () => {
             <h2 className="text-2xl font-bold">
               {language === "en" ? "Featured Products" : "منتجات مميزة"}
             </h2>
-            <Button variant="link" className="text-blue-600">
+            <Button
+              variant="link"
+              className="text-blue-600"
+              onClick={() => (window.location.href = "/products")}
+            >
               {language === "en" ? "View All" : "عرض الكل"}
             </Button>
           </div>
@@ -364,6 +393,9 @@ const HomePage = () => {
                   <Button
                     size="sm"
                     className="bg-white text-red-500 hover:bg-gray-100"
+                    onClick={() =>
+                      (window.location.href = "/products/electronics")
+                    }
                   >
                     {language === "en" ? "Shop Now" : "تسوق الآن"}
                   </Button>
@@ -385,6 +417,7 @@ const HomePage = () => {
                   <Button
                     size="sm"
                     className="bg-white text-blue-500 hover:bg-gray-100"
+                    onClick={() => (window.location.href = "/products/fashion")}
                   >
                     {language === "en" ? "Explore" : "استكشف"}
                   </Button>
@@ -447,22 +480,17 @@ const HomePage = () => {
               </h3>
               <ul className="space-y-2">
                 <li>
-                  <a href="#" className="hover:underline">
+                  <a href="/about-us" className="hover:underline">
                     {language === "en" ? "About Us" : "من نحن"}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:underline">
+                  <a href="/careers" className="hover:underline">
                     {language === "en" ? "Careers" : "وظائف"}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:underline">
-                    {language === "en" ? "Press" : "الصحافة"}
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:underline">
+                  <a href="/contact" className="hover:underline">
                     {language === "en" ? "Contact Us" : "اتصل بنا"}
                   </a>
                 </li>
@@ -475,24 +503,24 @@ const HomePage = () => {
               </h3>
               <ul className="space-y-2">
                 <li>
-                  <a href="#" className="hover:underline">
+                  <a href="/how-to-shop" className="hover:underline">
                     {language === "en" ? "How to Shop" : "كيفية التسوق"}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:underline">
+                  <a href="/payment-methods" className="hover:underline">
                     {language === "en" ? "Payment Methods" : "طرق الدفع"}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:underline">
+                  <a href="/shipping-info" className="hover:underline">
                     {language === "en"
                       ? "Shipping & Delivery"
                       : "الشحن والتوصيل"}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:underline">
+                  <a href="/returns-policy" className="hover:underline">
                     {language === "en"
                       ? "Returns & Refunds"
                       : "الإرجاع والاسترداد"}
@@ -512,7 +540,7 @@ const HomePage = () => {
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:underline">
+                  <a href="/seller-policies" className="hover:underline">
                     {language === "en" ? "Seller Policies" : "سياسات البائع"}
                   </a>
                 </li>
@@ -524,7 +552,7 @@ const HomePage = () => {
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:underline">
+                  <a href="/seller-support" className="hover:underline">
                     {language === "en" ? "Seller Support" : "دعم البائع"}
                   </a>
                 </li>
@@ -537,24 +565,24 @@ const HomePage = () => {
               </h3>
               <ul className="space-y-2">
                 <li>
-                  <a href="#" className="hover:underline">
+                  <a href="/terms" className="hover:underline">
                     {language === "en" ? "Terms of Service" : "شروط الخدمة"}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:underline">
+                  <a href="/privacy-policy" className="hover:underline">
                     {language === "en" ? "Privacy Policy" : "سياسة الخصوصية"}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:underline">
+                  <a href="/cookies-policy" className="hover:underline">
                     {language === "en"
                       ? "Cookie Policy"
                       : "سياسة ملفات تعريف الارتباط"}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:underline">
+                  <a href="/intellectual-property" className="hover:underline">
                     {language === "en"
                       ? "Intellectual Property"
                       : "الملكية الفكرية"}

@@ -24,6 +24,8 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import ProductCard from "./ProductCard";
+import { useAppStore } from "@/lib/store";
+import { useToast } from "@/components/ui/toast-simple";
 
 interface ProductGridProps {
   products?: Array<{
@@ -37,6 +39,7 @@ interface ProductGridProps {
   }>;
   categories?: string[];
   language?: string;
+  selectedCategory?: string;
 }
 
 const ProductGrid = ({
@@ -79,7 +82,7 @@ const ProductGrid = ({
         "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=500&q=80",
       rating: 4.0,
       seller: "متجر الأثاث",
-      category: "furniture",
+      category: "home",
     },
     {
       id: "5",
@@ -89,7 +92,7 @@ const ProductGrid = ({
         "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=500&q=80",
       rating: 4.7,
       seller: "متجر التجميل",
-      category: "beauty",
+      category: "personal-care",
     },
     {
       id: "6",
@@ -99,7 +102,7 @@ const ProductGrid = ({
         "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=500&q=80",
       rating: 4.3,
       seller: "متجر الأثاث",
-      category: "furniture",
+      category: "home",
     },
     {
       id: "7",
@@ -119,7 +122,7 @@ const ProductGrid = ({
         "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80",
       rating: 4.4,
       seller: "متجر الرياضة",
-      category: "fashion",
+      category: "sports",
     },
   ],
   categories = [
@@ -131,10 +134,16 @@ const ProductGrid = ({
     "الرياضة",
   ],
   language = "ar",
+  selectedCategory: initialSelectedCategory,
 }: ProductGridProps) => {
+  const { toast } = useToast();
+  const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } =
+    useAppStore();
   const [view, setView] = useState<"grid" | "list">("grid");
   const [priceRange, setPriceRange] = useState<number[]>([0, 10000000]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("الكل");
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    initialSelectedCategory || "الكل",
+  );
   const [sortBy, setSortBy] = useState<string>("featured");
   const [showFilters, setShowFilters] = useState<boolean>(false);
 
@@ -163,7 +172,8 @@ const ProductGrid = ({
     const allCategory = language === "en" ? "All" : "الكل";
     const matchesCategory =
       selectedCategory === allCategory ||
-      product.category === selectedCategory.toLowerCase();
+      product.category === selectedCategory ||
+      product.category === selectedCategory?.toLowerCase();
     const matchesPrice =
       product.price >= priceRange[0] && product.price <= priceRange[1];
     return matchesCategory && matchesPrice;
@@ -183,6 +193,61 @@ const ProductGrid = ({
     }
   });
 
+  const handleAddToCart = (productId: string) => {
+    const product = sortedProducts.find((p) => p.id === productId);
+    if (product) {
+      addToCart({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+        rating: product.rating,
+        seller: product.seller,
+        category: product.category,
+      });
+      toast({
+        title: getText("Added to Cart", "تم إضافة المنتج للسلة"),
+        description: getText(
+          `${product.title} has been added to your cart`,
+          `تم إضافة ${product.title} إلى سلتك`,
+        ),
+      });
+    }
+  };
+
+  const handleWishlistToggle = (productId: string) => {
+    const product = sortedProducts.find((p) => p.id === productId);
+    if (product) {
+      if (isInWishlist(productId)) {
+        removeFromWishlist(productId);
+        toast({
+          title: getText("Removed from Wishlist", "تم إزالة المنتج من المفضلة"),
+          description: getText(
+            `${product.title} has been removed from your wishlist`,
+            `تم إزالة ${product.title} من قائمة المفضلة`,
+          ),
+        });
+      } else {
+        addToWishlist({
+          id: product.id,
+          title: product.title,
+          price: product.price,
+          image: product.image,
+          rating: product.rating,
+          seller: product.seller,
+          category: product.category,
+        });
+        toast({
+          title: getText("Added to Wishlist", "تم إضافة المنتج للمفضلة"),
+          description: getText(
+            `${product.title} has been added to your wishlist`,
+            `تم إضافة ${product.title} إلى قائمة المفضلة`,
+          ),
+        });
+      }
+    }
+  };
+
   return (
     <div className="w-full bg-white p-4 md:p-6 rounded-lg shadow-sm">
       {/* Top controls */}
@@ -192,7 +257,8 @@ const ProductGrid = ({
             {getText("Products", "المنتجات")}
           </h2>
           <Badge variant="secondary" className="ml-2">
-            {sortedProducts.length} {getText("products", "منتج")}
+            {sortedProducts.length.toLocaleString("en")}{" "}
+            {getText("products", "منتج")}
           </Badge>
         </div>
 
@@ -359,12 +425,18 @@ const ProductGrid = ({
               {sortedProducts.map((product) => (
                 <ProductCard
                   key={product.id}
+                  id={product.id}
                   title={product.title}
                   price={product.price}
                   image={product.image}
                   rating={product.rating}
                   seller={product.seller}
-                  layout={view}
+                  isRTL={language === "ar"}
+                  onAddToCart={handleAddToCart}
+                  onAddToWishlist={handleWishlistToggle}
+                  onClick={() =>
+                    (window.location.href = `/products/detail/${product.id}`)
+                  }
                 />
               ))}
             </div>
